@@ -54,15 +54,18 @@ def get_quotes(y,m,d, slow, fast, stock):
     lower_vlty_std = df['lower_vlty_std']
     upper_vlty_std = df['upper_vlty_std']
 
-    slow_trades = slow_vlty.apply(np.sign)
-    slow_run = round(float(len(Slow_Ma.index)), 2)
-    slow_rise = round(int(slow_trades.sum()), 2)
-    slow_trend = round((slow_rise / slow_run), 2)
+    slow_values = slow_vlty.apply(np.sign)
+    slow_sum = round(int(slow_values.sum()), 2)
+    slow_length = round(float(len(Slow_Ma.index)), 2)
+    slow_trend = round((slow_sum / slow_length), 2)
 
-    fast_trades = fast_vlty.apply(np.sign)
-    fast_run = round(float(len(Fast_Ma.index)), 2)
-    fast_rise = round(int(fast_trades.sum()), 2)
-    fast_trend = round((fast_rise / fast_run), 2)
+    fast_values = fast_vlty.apply(np.sign)
+    fast_sum = round(int(fast_values.sum()), 2)
+    fast_length = round(float(len(Fast_Ma.index)), 2)
+    fast_trend = round((fast_sum / fast_length), 2)
+
+    slow_values = slow_values.shift(1) 
+    fast_values = fast_values.shift(1) 
 
     global cat
     if slow_trend >= 0.2 and fast_trend >= 0.2:
@@ -72,9 +75,6 @@ def get_quotes(y,m,d, slow, fast, stock):
     else:
         cat = 'Mean Reverting'
 
-    slow_trades = slow_trades.shift(1) 
-    fast_trades = fast_trades.shift(1) 
-
     style.use('fivethirtyeight')
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16,9))
 
@@ -82,12 +82,10 @@ def get_quotes(y,m,d, slow, fast, stock):
     ax2 = plt.subplot2grid((20,1),(13,0), rowspan=7, colspan=1)
 
     ax1.plot(df[['Close', 'Fast_Ma', 'Slow_Ma']], lw = 3)
-
     ax2.plot(df[['slow_vlty']], lw = 0)
     ax2.plot(df[['fast_vlty']], lw = 0)
-
     df.dropna(inplace=True)
-
+    
     box1 = dict(boxstyle = 'round4', fc = '#f2f2f2', ec = '#1992f8', lw = 2)
     ax1.annotate('{}'.format(Close[-1]),
         (df.index[-1], Close[-1]),
